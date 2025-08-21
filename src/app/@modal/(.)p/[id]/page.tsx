@@ -120,71 +120,73 @@ export default function InterceptedPromptDetailPage() {
   return (
     <>
       <Sheet open={true} onOpenChange={(open) => !open && handleClose()}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader className="mb-6">
-            <div className="flex justify-between items-center">
-              <SheetTitle>プロンプトの編集</SheetTitle>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                削除
-              </Button>
-            </div>
-          </SheetHeader>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor={titleId} className="text-sm font-medium">
-                タイトル <span className="text-destructive">*</span>
-              </label>
-              <Input
-                id={titleId}
-                type="text"
-                placeholder="プロンプトのタイトルを入力"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label htmlFor={bodyId} className="text-sm font-medium">
-                  プロンプト本文
-                </label>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+          <div className="p-6">
+            <SheetHeader className="mb-6">
+              <div className="flex justify-between items-start pr-10">
+                <SheetTitle className="text-lg">プロンプトの編集</SheetTitle>
                 <Button
-                  type="button"
-                  variant="outline"
+                  variant="destructive"
                   size="sm"
-                  onClick={handleCopy}
-                  disabled={!body.trim()}
+                  onClick={() => setShowDeleteDialog(true)}
                 >
-                  <Copy className="w-4 h-4 mr-2" />
-                  コピー
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  削除
                 </Button>
               </div>
-              <Textarea
-                id={bodyId}
-                placeholder="プロンプトの内容を入力"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                rows={10}
-                className="resize-none"
-              />
-            </div>
+            </SheetHeader>
 
-            <div className="flex gap-3">
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? "保存中..." : "保存"}
-              </Button>
-              <Button type="button" variant="outline" onClick={handleClose}>
-                キャンセル
-              </Button>
-            </div>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor={titleId} className="text-sm font-medium">
+                  タイトル <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  id={titleId}
+                  type="text"
+                  placeholder="プロンプトのタイトルを入力"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label htmlFor={bodyId} className="text-sm font-medium">
+                    プロンプト本文
+                  </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopy}
+                    disabled={!body.trim()}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    コピー
+                  </Button>
+                </div>
+                <Textarea
+                  id={bodyId}
+                  placeholder="プロンプトの内容を入力"
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  rows={10}
+                  className="resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? "保存中..." : "保存"}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleClose}>
+                  キャンセル
+                </Button>
+              </div>
+            </form>
+          </div>
         </SheetContent>
       </Sheet>
 

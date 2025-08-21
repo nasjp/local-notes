@@ -6,10 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "biome check src --write"
+    "lint": "biome check src --write",
+    "test": "bun test"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
+    "bun-types": "^1.2.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.540.0",

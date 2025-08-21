@@ -10,26 +10,44 @@ LLM用プロンプトをローカルストレージで管理する軽量Webア�
 
 ```bash
 # 開発サーバー起動（Turbopack使用）
-npm run dev
+bun run dev
 
 # プロダクションビルド
-npm run build
+bun run build
 
 # プロダクションサーバー起動
-npm run start
+bun run start
 
 # コードフォーマット・リント（BiomeJS）
-npm run lint
+bun run lint
 
-# 型チェック（Biomeが自動実行）
-npm run lint
+# テスト実行
+bun run test
 ```
+
+## コミット前の必須チェック
+
+**重要**: コミットする前に必ず以下のコマンドを実行してください：
+
+```bash
+# 1. リント・フォーマット
+bun run lint
+
+# 2. ビルドチェック
+bun run build
+
+# 3. テスト実行
+bun run test
+```
+
+すべてのチェックが成功した場合のみコミットを行ってください。
 
 ## アーキテクチャ概要
 
 ### 技術スタック
 - **フレームワーク**: Next.js 15.5.0 (App Router)
 - **言語**: TypeScript (strict mode)
+- **ランタイム**: Bun
 - **UI**: React 19.1.0 + shadcn/ui
 - **スタイリング**: Tailwind CSS 4.x
 - **リンター/フォーマッター**: BiomeJS
@@ -46,6 +64,32 @@ npm run lint
 - **パスエイリアス**: `@/`を使用（`@/components`など）
 - **コンポーネント**: shadcn/uiを優先使用
 - **データ永続化**: ローカルストレージを使用（要件定義に基づく）
+
+### TypeScriptコーディング規約
+- **型定義**: `interface`ではなく`type`を使用
+- **関数**: `class`ではなく`function`（関数コンポーネント、ユーティリティ関数）を使用
+
+```typescript
+// ✅ Good
+type User = {
+  id: string;
+  name: string;
+};
+
+export function useUser() {
+  // ...
+}
+
+// ❌ Bad
+interface User {
+  id: string;
+  name: string;
+}
+
+export class UserService {
+  // ...
+}
+```
 
 ### 主要機能（要件定義より）
 1. プロンプトのCRUD操作

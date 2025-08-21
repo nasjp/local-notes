@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Copy, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
@@ -23,7 +23,8 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 export default function PromptDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getPromptById, updatePrompt, deletePrompt } = useLocalStorage();
+  const { getPromptById, updatePrompt, deletePrompt, isLoading } =
+    useLocalStorage();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -36,15 +37,18 @@ export default function PromptDetailPage() {
   const prompt = getPromptById(promptId);
 
   useEffect(() => {
-    if (prompt) {
-      setTitle(prompt.title);
-      setBody(prompt.body);
-    } else {
-      // プロンプトが見つからない場合は一覧に戻る
-      toast.error("プロンプトが見つかりません");
-      router.push("/");
+    // データ読み込みが完了してからプロンプトの存在を確認
+    if (!isLoading) {
+      if (prompt) {
+        setTitle(prompt.title);
+        setBody(prompt.body);
+      } else {
+        // プロンプトが見つからない場合は一覧に戻る
+        toast.error("プロンプトが見つかりません");
+        router.push("/");
+      }
     }
-  }, [prompt, router]);
+  }, [prompt, router, isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,8 +98,22 @@ export default function PromptDetailPage() {
     }
   };
 
-  if (!prompt) {
-    return null;
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(body);
+      toast.success("プロンプトをコピーしました");
+    } catch {
+      toast.error("コピーに失敗しました");
+    }
+  };
+
+  // ローディング中または プロンプトが見つからない場合
+  if (isLoading || !prompt) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <p className="text-muted-foreground">読み込み中...</p>
+      </div>
+    );
   }
 
   return (
@@ -133,9 +151,21 @@ export default function PromptDetailPage() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor={bodyId} className="text-sm font-medium">
-            プロンプト本文
-          </label>
+          <div className="flex justify-between items-center">
+            <label htmlFor={bodyId} className="text-sm font-medium">
+              プロンプト本文
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCopy}
+              disabled={!body.trim()}
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              コピー
+            </Button>
+          </div>
           <Textarea
             id={bodyId}
             placeholder="プロンプトの内容を入力"

@@ -1,8 +1,10 @@
 "use client";
 
-import { FileText, Plus } from "lucide-react";
+import { Copy, FileText, Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export default function Home() {
+  const router = useRouter();
   const { prompts, isLoading, error } = useLocalStorage();
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,6 +42,20 @@ export default function Home() {
         prompt.body.toLowerCase().includes(query),
     );
   }, [prompts, searchQuery]);
+
+  const handleCopy = (e: React.MouseEvent, text: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success("プロンプトをコピーしました");
+      })
+      .catch(() => {
+        toast.error("コピーに失敗しました");
+      });
+  };
 
   if (isLoading) {
     return (
@@ -99,29 +116,42 @@ export default function Home() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredPrompts.map((prompt) => (
-            <Link key={prompt.id} href={`/p/${prompt.id}`}>
-              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="pb-3">
-                  <CardTitle className="line-clamp-1 text-lg">
+            <Card
+              key={prompt.id}
+              className="h-full hover:shadow-lg transition-shadow cursor-pointer relative"
+              onClick={() => router.push(`/p/${prompt.id}`)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start gap-2">
+                  <CardTitle className="line-clamp-1 text-lg flex-1">
                     {prompt.title}
                   </CardTitle>
-                  <CardDescription className="text-xs">
-                    {new Date(prompt.updatedAt).toLocaleDateString("ja-JP", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {prompt.body || "（本文なし）"}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 flex-shrink-0"
+                    onClick={(e) => handleCopy(e, prompt.body)}
+                    disabled={!prompt.body}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <CardDescription className="text-xs">
+                  {new Date(prompt.updatedAt).toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {prompt.body || "（本文なし）"}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}

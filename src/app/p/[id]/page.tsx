@@ -1,38 +1,24 @@
-"use client";
+import { PageHeader } from "@/components/page-header";
+import { PromptDetailSheet } from "@/components/prompt-detail-sheet";
+import { PromptGrid } from "@/components/prompt-grid";
 
-import { useParams, useRouter } from "next/navigation";
-import { PromptEditor } from "@/components/prompt-editor";
-import { PromptList } from "@/components/prompt-list";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-
-export default function PromptDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const promptId = params.id as string;
-
-  const handleClose = () => {
-    router.push("/");
-  };
+export default async function PromptDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
   return (
     <>
       {/* 背景に一覧画面を表示 */}
-      <PromptList />
+      <div className="space-y-6">
+        <PageHeader />
+        <PromptGrid />
+      </div>
 
       {/* その上にSheetで詳細を表示 */}
-      <Sheet open={true} onOpenChange={(open) => !open && handleClose()}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
-          <SheetTitle className="sr-only">Edit</SheetTitle>
-          <div className="p-6">
-            <PromptEditor
-              promptId={promptId}
-              onClose={handleClose}
-              onSave={handleClose}
-              onDelete={handleClose}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <PromptDetailSheet promptId={id} />
     </>
   );
 }

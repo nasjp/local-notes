@@ -1,7 +1,6 @@
 "use client";
 
-import { Copy, FileText, Plus } from "lucide-react";
-import Link from "next/link";
+import { Copy, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -13,23 +12,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useSearchContext } from "@/contexts/search-context";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-export function PromptList() {
+export function PromptGrid() {
   const router = useRouter();
   const { prompts, isLoading, error } = useLocalStorage();
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery } = useSearchContext();
+  const [isVisible, setIsVisible] = useState(false);
 
-  // 検索入力のデバウンス処理（200ms）
+  // フェードインアニメーション用のトリガー
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchQuery(searchInput);
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+    if (!isLoading) {
+      // 少し遅延を入れてアニメーション効果を高める
+      const timer = setTimeout(() => setIsVisible(true), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   // 検索フィルタリング（部分一致、大文字小文字区別なし）
   const filteredPrompts = useMemo(() => {
@@ -57,14 +56,7 @@ export function PromptList() {
       });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <p className="text-muted-foreground">読み込み中...</p>
-      </div>
-    );
-  }
-
+  // エラー表示
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -73,30 +65,18 @@ export function PromptList() {
     );
   }
 
+  // ローディング中は何も表示しない（フェードイン前の状態）
+  if (isLoading) {
+    return null;
+  }
+
   return (
-    <div className="space-y-6">
-      {/* タイトル */}
-      <h1 className="text-3xl font-bold text-center mb-8">Prompt Storage</h1>
-
-      {/* 検索バーと新規作成ボタン */}
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Input
-            type="text"
-            placeholder="検索..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full rounded-full px-6 shadow-sm"
-          />
-        </div>
-        <Link href="/new">
-          <Button className="rounded-full">
-            <Plus className="w-4 h-4 mr-2" />
-            New
-          </Button>
-        </Link>
-      </div>
-
+    <div
+      className={`
+        transition-opacity duration-500 ease-in-out
+        ${isVisible ? "opacity-100" : "opacity-0"}
+      `}
+    >
       {/* カードグリッド */}
       {filteredPrompts.length === 0 ? (
         searchQuery ? (

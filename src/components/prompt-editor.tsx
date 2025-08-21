@@ -39,6 +39,7 @@ export function PromptEditor({
   const [body, setBody] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const titleId = useId();
   const bodyId = useId();
@@ -46,20 +47,25 @@ export function PromptEditor({
   const prompt = getPromptById(promptId);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (prompt) {
-        setTitle(prompt.title);
-        setBody(prompt.body);
+    // 削除済みの場合は何もしない
+    if (isDeleted) return;
+
+    // ローディング中は何もしない
+    if (isLoading) return;
+
+    if (prompt) {
+      setTitle(prompt.title);
+      setBody(prompt.body);
+    } else {
+      // プロンプトが見つからない場合のエラー表示とリダイレクト
+      toast.error("プロンプトが見つかりません");
+      if (onClose) {
+        onClose();
       } else {
-        toast.error("プロンプトが見つかりません");
-        if (onClose) {
-          onClose();
-        } else {
-          router.back();
-        }
+        router.back();
       }
     }
-  }, [prompt, router, isLoading, onClose]);
+  }, [prompt, router, isLoading, onClose, isDeleted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,14 +109,22 @@ export function PromptEditor({
       const success = deletePrompt(promptId);
 
       if (success) {
+        // 削除成功のトーストを表示
         toast.success("プロンプトを削除しました");
-        if (onDelete) {
-          onDelete();
-        } else if (onClose) {
-          onClose();
-        } else {
-          router.back();
-        }
+
+        // 即座にisDeletedを設定してuseEffectのエラー表示を防ぐ
+        setIsDeleted(true);
+
+        // 少し遅延を入れてからリダイレクト（トーストが見えるように）
+        setTimeout(() => {
+          if (onDelete) {
+            onDelete();
+          } else if (onClose) {
+            onClose();
+          } else {
+            router.back();
+          }
+        }, 100);
       } else {
         throw new Error("削除に失敗しました");
       }
@@ -137,7 +151,7 @@ export function PromptEditor({
     }
   };
 
-  if (isLoading || !prompt) {
+  if (isLoading || !prompt || isDeleted) {
     return null;
   }
 
@@ -146,23 +160,26 @@ export function PromptEditor({
       <div className="mb-6">
         <div className="flex justify-between items-start pr-10">
           <h2 className="text-lg font-semibold">Edit Prompt</h2>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDeleteDialog(true)}
-            className="rounded-full"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            削除
-          </Button>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label htmlFor={titleId} className="text-sm font-medium">
-            タイトル <span className="text-destructive">*</span>
-          </label>
+          <div className="flex justify-between items-center">
+            <label htmlFor={titleId} className="text-sm font-medium">
+              タイトル <span className="text-destructive">*</span>
+            </label>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowDeleteDialog(true)}
+              className="rounded-full"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              削除
+            </Button>
+          </div>
           <Input
             id={titleId}
             type="text"

@@ -100,7 +100,7 @@ export function PromptList() {
       {/* カードグリッド */}
       {filteredPrompts.length === 0 ? (
         searchQuery ? (
-          <Card className="p-8">
+          <Card className="p-8 max-w-2xl mx-auto">
             <div className="flex flex-col items-center justify-center text-center space-y-4">
               <FileText className="w-12 h-12 text-muted-foreground" />
               <div className="space-y-2">

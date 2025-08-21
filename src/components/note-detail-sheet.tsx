@@ -19,6 +19,7 @@ export function NoteDetailSheet({ noteId }: NoteDetailSheetProps) {
     // アニメーション完了後にルーティング
     setTimeout(() => {
       router.push("/");
+      router.refresh();
     }, 300); // Sheetのアニメーション時間
   };
 

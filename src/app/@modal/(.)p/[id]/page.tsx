@@ -5,7 +5,7 @@ import { useState } from "react";
 import { NoteEditor } from "@/components/note-editor";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
-export default function InterceptedPromptDetailPage() {
+export default function InterceptedNoteDetailPage() {
   const params = useParams();
   const router = useRouter();
   const noteId = params.id as string;

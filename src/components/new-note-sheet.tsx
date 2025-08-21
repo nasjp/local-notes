@@ -23,6 +23,7 @@ export function NewNoteSheet({ isIntercepted = false }: NewNoteSheetProps) {
       } else {
         router.push("/");
       }
+      router.refresh();
     }, 300); // Sheetのアニメーション時間
   };
 

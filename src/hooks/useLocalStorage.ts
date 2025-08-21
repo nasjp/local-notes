@@ -49,6 +49,8 @@ export function useLocalStorage() {
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
       setError(null);
+      // カスタムイベントを発火（同じタブ内での更新を通知）
+      window.dispatchEvent(new Event("local-storage-update"));
       return true;
     } catch (err) {
       if (err instanceof DOMException && err.name === "QuotaExceededError") {
@@ -132,9 +134,29 @@ export function useLocalStorage() {
     [notes],
   );
 
-  // 初回マウント時にデータを読み込む
+  // 初回マウント時にデータを読み込む & ストレージの変更を監視
   useEffect(() => {
     loadFromStorage();
+
+    // ストレージイベントをリッスン（他のタブ/ウィンドウでの変更を検知）
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) {
+        loadFromStorage();
+      }
+    };
+
+    // カスタムイベントをリッスン（同じタブ内での変更を検知）
+    const handleLocalChange = () => {
+      loadFromStorage();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("local-storage-update", handleLocalChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("local-storage-update", handleLocalChange);
+    };
   }, [loadFromStorage]);
 
   return {

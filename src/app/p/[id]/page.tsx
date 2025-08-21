@@ -2,7 +2,7 @@ import { NoteDetailSheet } from "@/components/note-detail-sheet";
 import { NoteGrid } from "@/components/note-grid";
 import { PageHeader } from "@/components/page-header";
 
-export default async function PromptDetailPage({
+export default async function NoteDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;

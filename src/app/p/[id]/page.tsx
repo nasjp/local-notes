@@ -117,7 +117,7 @@ export default function PromptDetailPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="space-y-6">
       <div className="mb-6 flex justify-between items-center">
         <Link href="/">
           <Button variant="ghost" size="sm">

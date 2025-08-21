@@ -19,22 +19,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-interface PromptEditorProps {
-  promptId: string;
+interface NoteEditorProps {
+  noteId: string;
   onClose?: () => void;
   onSave?: () => void;
   onDelete?: () => void;
 }
 
-export function PromptEditor({
-  promptId,
+export function NoteEditor({
+  noteId,
   onClose,
   onSave,
   onDelete,
-}: PromptEditorProps) {
+}: NoteEditorProps) {
   const router = useRouter();
-  const { getPromptById, updatePrompt, deletePrompt, isLoading } =
-    useLocalStorage();
+  const { getNoteById, updateNote, deleteNote, isLoading } = useLocalStorage();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -44,7 +43,7 @@ export function PromptEditor({
   const titleId = useId();
   const bodyId = useId();
 
-  const prompt = getPromptById(promptId);
+  const note = getNoteById(noteId);
 
   useEffect(() => {
     // 削除済みの場合は何もしない
@@ -53,38 +52,38 @@ export function PromptEditor({
     // ローディング中は何もしない
     if (isLoading) return;
 
-    if (prompt) {
-      setTitle(prompt.title);
-      setBody(prompt.body);
+    if (note) {
+      setTitle(note.title);
+      setBody(note.body);
     } else {
-      // プロンプトが見つからない場合のエラー表示とリダイレクト
-      toast.error("プロンプトが見つかりません");
+      // ノートが見つからない場合のエラー表示とリダイレクト
+      toast.error("Note not found");
       if (onClose) {
         onClose();
       } else {
         router.back();
       }
     }
-  }, [prompt, router, isLoading, onClose, isDeleted]);
+  }, [note, router, isLoading, onClose, isDeleted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      toast.error("タイトルを入力してください");
+      toast.error("Please enter a title");
       return;
     }
 
     setIsSaving(true);
 
     try {
-      const success = updatePrompt(promptId, {
+      const success = updateNote(noteId, {
         title: title.trim(),
         body: body.trim(),
       });
 
       if (success) {
-        toast.success("プロンプトを更新しました");
+        toast.success("Note updated successfully");
         if (onSave) {
           onSave();
         } else if (onClose) {
@@ -93,10 +92,10 @@ export function PromptEditor({
           router.back();
         }
       } else {
-        throw new Error("更新に失敗しました");
+        throw new Error("Failed to update");
       }
     } catch {
-      toast.error("更新に失敗しました。再度お試しください。");
+      toast.error("Failed to update. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -106,30 +105,23 @@ export function PromptEditor({
     setIsDeleting(true);
 
     try {
-      const success = deletePrompt(promptId);
+      const success = deleteNote(noteId);
 
       if (success) {
-        // 削除成功のトーストを表示
-        toast.success("プロンプトを削除しました");
-
-        // 即座にisDeletedを設定してuseEffectのエラー表示を防ぐ
         setIsDeleted(true);
-
-        // 少し遅延を入れてからリダイレクト（トーストが見えるように）
-        setTimeout(() => {
-          if (onDelete) {
-            onDelete();
-          } else if (onClose) {
-            onClose();
-          } else {
-            router.back();
-          }
-        }, 100);
+        toast.success("Note deleted successfully");
+        if (onDelete) {
+          onDelete();
+        } else if (onClose) {
+          onClose();
+        } else {
+          router.back();
+        }
       } else {
-        throw new Error("削除に失敗しました");
+        throw new Error("Failed to delete");
       }
     } catch {
-      toast.error("削除に失敗しました。再度お試しください。");
+      toast.error("Failed to delete. Please try again.");
       setIsDeleting(false);
     }
   };
@@ -137,9 +129,9 @@ export function PromptEditor({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(body);
-      toast.success("プロンプトをコピーしました");
+      toast.success("Note copied to clipboard");
     } catch {
-      toast.error("コピーに失敗しました");
+      toast.error("Failed to copy");
     }
   };
 
@@ -151,7 +143,7 @@ export function PromptEditor({
     }
   };
 
-  if (isLoading || !prompt || isDeleted) {
+  if (isLoading || !note || isDeleted) {
     return null;
   }
 
@@ -159,7 +151,7 @@ export function PromptEditor({
     <>
       <div className="mb-6">
         <div className="flex justify-between items-start pr-10">
-          <h2 className="text-lg font-semibold">Edit Prompt</h2>
+          <h2 className="text-lg font-semibold">Edit Note</h2>
         </div>
       </div>
 
@@ -167,7 +159,7 @@ export function PromptEditor({
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <label htmlFor={titleId} className="text-sm font-medium">
-              タイトル <span className="text-destructive">*</span>
+              Title <span className="text-destructive">*</span>
             </label>
             <Button
               type="button"
@@ -177,13 +169,13 @@ export function PromptEditor({
               className="rounded-full"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              削除
+              Delete
             </Button>
           </div>
           <Input
             id={titleId}
             type="text"
-            placeholder="プロンプトのタイトルを入力"
+            placeholder="Enter note title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -194,7 +186,7 @@ export function PromptEditor({
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <label htmlFor={bodyId} className="text-sm font-medium">
-              プロンプト本文
+              Note Content
             </label>
             <Button
               type="button"
@@ -205,12 +197,12 @@ export function PromptEditor({
               className="rounded-full"
             >
               <Copy className="w-4 h-4 mr-2" />
-              コピー
+              Copy
             </Button>
           </div>
           <Textarea
             id={bodyId}
-            placeholder="プロンプトの内容を入力"
+            placeholder="Enter note content"
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={10}
@@ -220,7 +212,7 @@ export function PromptEditor({
 
         <div className="flex gap-3">
           <Button type="submit" disabled={isSaving} className="rounded-full">
-            {isSaving ? "保存中..." : "保存"}
+            {isSaving ? "Saving..." : "Save"}
           </Button>
           <Button
             type="button"
@@ -228,7 +220,7 @@ export function PromptEditor({
             onClick={handleCancel}
             className="rounded-full"
           >
-            キャンセル
+            Cancel
           </Button>
         </div>
       </form>
@@ -236,22 +228,22 @@ export function PromptEditor({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>プロンプトの削除</AlertDialogTitle>
+            <AlertDialogTitle>Delete Note</AlertDialogTitle>
             <AlertDialogDescription>
-              「{prompt.title}」を削除してもよろしいですか？
-              この操作は取り消すことができません。
+              Are you sure you want to delete &ldquo;{note.title}&rdquo;? This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-full">
-              キャンセル
+              Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full"
             >
-              {isDeleting ? "削除中..." : "削除"}
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

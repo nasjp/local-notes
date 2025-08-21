@@ -8,7 +8,7 @@ export function SearchInput() {
   const { searchQuery, setSearchQuery } = useSearchContext();
   const [localSearchInput, setLocalSearchInput] = useState(searchQuery);
 
-  // 検索入力のデバウンス処理（200ms）
+  // Debounce search input (200ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchQuery(localSearchInput);
@@ -20,7 +20,7 @@ export function SearchInput() {
   return (
     <Input
       type="text"
-      placeholder="検索..."
+      placeholder="Search..."
       value={localSearchInput}
       onChange={(e) => setLocalSearchInput(e.target.value)}
       className="w-full rounded-full px-6 shadow-sm"

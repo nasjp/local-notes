@@ -11,7 +11,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export default function NewPromptPage() {
   const router = useRouter();
-  const { addPrompt } = useLocalStorage();
+  const { addNote } = useLocalStorage();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -23,23 +23,23 @@ export default function NewPromptPage() {
 
     // バリデーション
     if (!title.trim()) {
-      toast.error("タイトルを入力してください");
+      toast.error("Please enter a title");
       return;
     }
 
     setIsSaving(true);
 
     try {
-      const newPrompt = addPrompt({ title: title.trim(), body: body.trim() });
+      const newNote = addNote({ title: title.trim(), body: body.trim() });
 
-      if (newPrompt) {
-        toast.success("プロンプトを保存しました");
+      if (newNote) {
+        toast.success("Note saved successfully");
         router.push("/");
       } else {
         throw new Error("保存に失敗しました");
       }
     } catch {
-      toast.error("保存に失敗しました。再度お試しください。");
+      toast.error("Failed to save. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -48,17 +48,17 @@ export default function NewPromptPage() {
   return (
     <div className="space-y-6">
       {/* タイトル */}
-      <h1 className="text-3xl font-bold text-center mb-8">New Prompt</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">New Note</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <label htmlFor={titleId} className="text-sm font-medium">
-            タイトル <span className="text-destructive">*</span>
+            Title <span className="text-destructive">*</span>
           </label>
           <Input
             id={titleId}
             type="text"
-            placeholder="プロンプトのタイトルを入力"
+            placeholder="Enter note title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -69,11 +69,11 @@ export default function NewPromptPage() {
 
         <div className="space-y-2">
           <label htmlFor={bodyId} className="text-sm font-medium">
-            プロンプト本文
+            Note Content
           </label>
           <Textarea
             id={bodyId}
-            placeholder="プロンプトの内容を入力"
+            placeholder="Enter note content"
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={10}
@@ -83,11 +83,11 @@ export default function NewPromptPage() {
 
         <div className="flex gap-3">
           <Button type="submit" disabled={isSaving} className="rounded-full">
-            {isSaving ? "保存中..." : "保存"}
+            {isSaving ? "Saving..." : "Save"}
           </Button>
           <Link href="/">
             <Button type="button" variant="outline" className="rounded-full">
-              キャンセル
+              Cancel
             </Button>
           </Link>
         </div>

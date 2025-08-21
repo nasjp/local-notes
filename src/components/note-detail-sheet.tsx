@@ -2,14 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { PromptEditor } from "@/components/prompt-editor";
+import { NoteEditor } from "@/components/note-editor";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
-interface PromptDetailSheetProps {
-  promptId: string;
+interface NoteDetailSheetProps {
+  noteId: string;
 }
 
-export function PromptDetailSheet({ promptId }: PromptDetailSheetProps) {
+export function NoteDetailSheet({ noteId }: NoteDetailSheetProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
 
@@ -33,8 +33,8 @@ export function PromptDetailSheet({ promptId }: PromptDetailSheetProps) {
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
         <SheetTitle className="sr-only">Edit</SheetTitle>
         <div className="p-6">
-          <PromptEditor
-            promptId={promptId}
+          <NoteEditor
+            noteId={noteId}
             onClose={handleClose}
             onSave={handleClose}
             onDelete={handleClose}

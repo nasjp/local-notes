@@ -2,13 +2,13 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { PromptEditor } from "@/components/prompt-editor";
+import { NoteEditor } from "@/components/note-editor";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function InterceptedPromptDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const promptId = params.id as string;
+  const noteId = params.id as string;
   const [isOpen, setIsOpen] = useState(true);
 
   const handleClose = () => {
@@ -31,8 +31,8 @@ export default function InterceptedPromptDetailPage() {
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
         <SheetTitle className="sr-only">Edit</SheetTitle>
         <div className="p-6">
-          <PromptEditor
-            promptId={promptId}
+          <NoteEditor
+            noteId={noteId}
             onClose={handleClose}
             onSave={handleClose}
             onDelete={handleClose}

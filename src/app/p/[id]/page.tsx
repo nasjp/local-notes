@@ -1,6 +1,6 @@
+import { NoteDetailSheet } from "@/components/note-detail-sheet";
+import { NoteGrid } from "@/components/note-grid";
 import { PageHeader } from "@/components/page-header";
-import { PromptDetailSheet } from "@/components/prompt-detail-sheet";
-import { PromptGrid } from "@/components/prompt-grid";
 
 export default async function PromptDetailPage({
   params,
@@ -14,11 +14,11 @@ export default async function PromptDetailPage({
       {/* 背景に一覧画面を表示 */}
       <div className="space-y-6">
         <PageHeader />
-        <PromptGrid />
+        <NoteGrid />
       </div>
 
       {/* その上にSheetで詳細を表示 */}
-      <PromptDetailSheet promptId={id} />
+      <NoteDetailSheet noteId={id} />
     </>
   );
 }

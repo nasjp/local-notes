@@ -1,4 +1,4 @@
-export type Prompt = {
+export type Note = {
   id: string;
   title: string;
   body: string;
@@ -7,8 +7,8 @@ export type Prompt = {
 };
 
 export type Store = {
-  prompts: Prompt[];
+  notes: Note[];
   version: 1;
 };
 
-export const STORAGE_KEY = "prompt-storage:v1";
+export const STORAGE_KEY = "local-notes:v1";

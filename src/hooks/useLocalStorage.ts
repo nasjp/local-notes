@@ -1,16 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Prompt, Store } from "@/types/prompt";
-import { STORAGE_KEY } from "@/types/prompt";
+import type { Note, Store } from "@/types/note";
+import { STORAGE_KEY } from "@/types/note";
 
 const initialStore: Store = {
-  prompts: [],
+  notes: [],
   version: 1,
 };
 
 export function useLocalStorage() {
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,11 +20,11 @@ export function useLocalStorage() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(initialStore));
-        setPrompts([]);
+        setNotes([]);
       } else {
         const data: Store = JSON.parse(stored);
-        setPrompts(
-          data.prompts.sort(
+        setNotes(
+          data.notes.sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
           ),
@@ -33,18 +33,18 @@ export function useLocalStorage() {
       setError(null);
     } catch (err) {
       console.error("Failed to load from localStorage:", err);
-      setError("データの読み込みに失敗しました。");
-      setPrompts([]);
+      setError("Failed to load data.");
+      setNotes([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   // ローカルストレージにデータを保存する
-  const saveToStorage = useCallback((newPrompts: Prompt[]) => {
+  const saveToStorage = useCallback((newNotes: Note[]) => {
     try {
       const store: Store = {
-        prompts: newPrompts,
+        notes: newNotes,
         version: 1,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
@@ -52,55 +52,53 @@ export function useLocalStorage() {
       return true;
     } catch (err) {
       if (err instanceof DOMException && err.name === "QuotaExceededError") {
-        setError(
-          "ストレージの容量が不足しています。不要なプロンプトを削除してください。",
-        );
+        setError("Storage quota exceeded. Please delete unnecessary notes.");
       } else {
-        setError("データの保存に失敗しました。");
+        setError("Failed to save data.");
       }
       console.error("Failed to save to localStorage:", err);
       return false;
     }
   }, []);
 
-  // プロンプトを追加する
-  const addPrompt = useCallback(
-    (prompt: Omit<Prompt, "id" | "createdAt" | "updatedAt">) => {
+  // ノートを追加する
+  const addNote = useCallback(
+    (note: Omit<Note, "id" | "createdAt" | "updatedAt">) => {
       const now = new Date().toISOString();
-      const newPrompt: Prompt = {
-        ...prompt,
+      const newNote: Note = {
+        ...note,
         id: crypto.randomUUID(),
         createdAt: now,
         updatedAt: now,
       };
 
-      const newPrompts = [...prompts, newPrompt];
-      if (saveToStorage(newPrompts)) {
-        setPrompts(
-          newPrompts.sort(
+      const newNotes = [...notes, newNote];
+      if (saveToStorage(newNotes)) {
+        setNotes(
+          newNotes.sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
           ),
         );
-        return newPrompt;
+        return newNote;
       }
       return null;
     },
-    [prompts, saveToStorage],
+    [notes, saveToStorage],
   );
 
-  // プロンプトを更新する
-  const updatePrompt = useCallback(
-    (id: string, updates: Partial<Omit<Prompt, "id" | "createdAt">>) => {
-      const newPrompts = prompts.map((prompt) =>
-        prompt.id === id
-          ? { ...prompt, ...updates, updatedAt: new Date().toISOString() }
-          : prompt,
+  // ノートを更新する
+  const updateNote = useCallback(
+    (id: string, updates: Partial<Omit<Note, "id" | "createdAt">>) => {
+      const newNotes = notes.map((note) =>
+        note.id === id
+          ? { ...note, ...updates, updatedAt: new Date().toISOString() }
+          : note,
       );
 
-      if (saveToStorage(newPrompts)) {
-        setPrompts(
-          newPrompts.sort(
+      if (saveToStorage(newNotes)) {
+        setNotes(
+          newNotes.sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
           ),
@@ -109,29 +107,29 @@ export function useLocalStorage() {
       }
       return false;
     },
-    [prompts, saveToStorage],
+    [notes, saveToStorage],
   );
 
-  // プロンプトを削除する
-  const deletePrompt = useCallback(
+  // ノートを削除する
+  const deleteNote = useCallback(
     (id: string) => {
-      const newPrompts = prompts.filter((prompt) => prompt.id !== id);
+      const newNotes = notes.filter((note) => note.id !== id);
 
-      if (saveToStorage(newPrompts)) {
-        setPrompts(newPrompts);
+      if (saveToStorage(newNotes)) {
+        setNotes(newNotes);
         return true;
       }
       return false;
     },
-    [prompts, saveToStorage],
+    [notes, saveToStorage],
   );
 
-  // プロンプトをIDで取得する
-  const getPromptById = useCallback(
+  // ノートをIDで取得する
+  const getNoteById = useCallback(
     (id: string) => {
-      return prompts.find((prompt) => prompt.id === id);
+      return notes.find((note) => note.id === id);
     },
-    [prompts],
+    [notes],
   );
 
   // 初回マウント時にデータを読み込む
@@ -140,13 +138,13 @@ export function useLocalStorage() {
   }, [loadFromStorage]);
 
   return {
-    prompts,
+    notes,
     isLoading,
     error,
-    addPrompt,
-    updatePrompt,
-    deletePrompt,
-    getPromptById,
+    addNote,
+    updateNote,
+    deleteNote,
+    getNoteById,
     reload: loadFromStorage,
   };
 }

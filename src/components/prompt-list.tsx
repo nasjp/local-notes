@@ -75,6 +75,9 @@ export function PromptList() {
 
   return (
     <div className="space-y-6">
+      {/* タイトル */}
+      <h1 className="text-3xl font-bold text-center mb-8">Prompt Storage</h1>
+
       {/* 検索バーと新規作成ボタン */}
       <div className="flex gap-4">
         <div className="flex-1">
@@ -83,11 +86,11 @@ export function PromptList() {
             placeholder="検索..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full"
+            className="w-full rounded-full px-6 shadow-sm"
           />
         </div>
         <Link href="/new">
-          <Button>
+          <Button className="rounded-full">
             <Plus className="w-4 h-4 mr-2" />
             New
           </Button>
@@ -96,23 +99,19 @@ export function PromptList() {
 
       {/* カードグリッド */}
       {filteredPrompts.length === 0 ? (
-        <Card className="p-8">
-          <div className="flex flex-col items-center justify-center text-center space-y-4">
-            <FileText className="w-12 h-12 text-muted-foreground" />
-            <div className="space-y-2">
-              <p className="text-lg font-medium">
-                {searchQuery
-                  ? "検索結果が見つかりません"
-                  : "プロンプトがありません"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {searchQuery
-                  ? "別の検索キーワードを試してください"
-                  : "'+ New' ボタンをクリックして最初のプロンプトを作成しましょう"}
-              </p>
+        searchQuery ? (
+          <Card className="p-8">
+            <div className="flex flex-col items-center justify-center text-center space-y-4">
+              <FileText className="w-12 h-12 text-muted-foreground" />
+              <div className="space-y-2">
+                <p className="text-lg font-medium">検索結果が見つかりません</p>
+                <p className="text-sm text-muted-foreground">
+                  別の検索キーワードを試してください
+                </p>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        ) : null
       ) : (
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredPrompts.map((prompt) => (

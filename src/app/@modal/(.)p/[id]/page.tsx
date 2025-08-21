@@ -16,7 +16,7 @@ export default function InterceptedPromptDetailPage() {
   return (
     <Sheet open={true} onOpenChange={(open) => !open && handleClose()}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
-        <SheetTitle className="sr-only">プロンプトの編集</SheetTitle>
+        <SheetTitle className="sr-only">Edit</SheetTitle>
         <div className="p-6">
           <PromptEditor
             promptId={promptId}

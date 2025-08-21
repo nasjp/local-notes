@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
@@ -48,14 +47,8 @@ export default function NewPromptPage() {
 
   return (
     <div className="space-y-6">
-      <div className="mb-6">
-        <Link href="/">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            戻る
-          </Button>
-        </Link>
-      </div>
+      {/* タイトル */}
+      <h1 className="text-3xl font-bold text-center mb-8">New Prompt</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">

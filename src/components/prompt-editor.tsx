@@ -145,7 +145,7 @@ export function PromptEditor({
     <>
       <div className="mb-6">
         <div className="flex justify-between items-start pr-10">
-          <h2 className="text-lg font-semibold">プロンプトの編集</h2>
+          <h2 className="text-lg font-semibold">Edit Prompt</h2>
           <Button
             variant="destructive"
             size="sm"

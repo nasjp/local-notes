@@ -30,13 +30,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen flex flex-col">
-          <header className="border-b">
-            <div className="container mx-auto px-4 py-6">
-              <h1 className="text-2xl font-bold text-center">Prompt Storage</h1>
-            </div>
-          </header>
-          <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="min-h-screen">
+          <main className="container mx-auto px-4 py-8">
             {children}
             {modal}
           </main>

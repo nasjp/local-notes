@@ -150,6 +150,7 @@ export function PromptEditor({
             variant="destructive"
             size="sm"
             onClick={() => setShowDeleteDialog(true)}
+            className="rounded-full"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             削除
@@ -169,6 +170,7 @@ export function PromptEditor({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            className="rounded-full px-6"
           />
         </div>
 
@@ -183,6 +185,7 @@ export function PromptEditor({
               size="sm"
               onClick={handleCopy}
               disabled={!body.trim()}
+              className="rounded-full"
             >
               <Copy className="w-4 h-4 mr-2" />
               コピー
@@ -194,15 +197,20 @@ export function PromptEditor({
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={10}
-            className="resize-none"
+            className="resize-none rounded-2xl px-6 py-4"
           />
         </div>
 
         <div className="flex gap-3">
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving} className="rounded-full">
             {isSaving ? "保存中..." : "保存"}
           </Button>
-          <Button type="button" variant="outline" onClick={handleCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            className="rounded-full"
+          >
             キャンセル
           </Button>
         </div>
@@ -218,11 +226,13 @@ export function PromptEditor({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-full">
+              キャンセル
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full"
             >
               {isDeleting ? "削除中..." : "削除"}
             </AlertDialogAction>

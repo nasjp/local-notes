@@ -63,6 +63,7 @@ export default function NewPromptPage() {
             onChange={(e) => setTitle(e.target.value)}
             required
             autoFocus
+            className="rounded-full px-6"
           />
         </div>
 
@@ -76,16 +77,16 @@ export default function NewPromptPage() {
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={10}
-            className="resize-none"
+            className="resize-none rounded-2xl px-6 py-4"
           />
         </div>
 
         <div className="flex gap-3">
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving} className="rounded-full">
             {isSaving ? "保存中..." : "保存"}
           </Button>
           <Link href="/">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" className="rounded-full">
               キャンセル
             </Button>
           </Link>

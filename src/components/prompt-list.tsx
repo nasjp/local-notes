@@ -128,7 +128,7 @@ export function PromptList() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 flex-shrink-0"
+                    className="h-8 w-8 flex-shrink-0 rounded-full"
                     onClick={(e) => handleCopy(e, prompt.body)}
                     disabled={!prompt.body}
                   >

@@ -5,8 +5,8 @@ import { SearchInput } from "./search-input";
 
 export function SearchBar() {
   return (
-    <div className="flex gap-4">
-      <div className="flex-1">
+    <div className="flex gap-4 justify-center">
+      <div className="w-full md:w-1/3">
         <SearchInput />
       </div>
       <Link href="/new">

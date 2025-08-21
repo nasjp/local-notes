@@ -33,7 +33,7 @@ export default function RootLayout({
       >
         <SearchProvider>
           <div className="min-h-screen">
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 pb-8">
               {children}
               {modal}
             </main>

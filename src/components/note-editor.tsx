@@ -230,8 +230,8 @@ export function NoteEditor({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Note</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &ldquo;{note.title}&rdquo;? This action cannot
-              be undone.
+              Are you sure you want to delete &ldquo;{note.title}&rdquo;? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

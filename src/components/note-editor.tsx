@@ -2,7 +2,14 @@
 
 import { Copy, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -18,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { debounce } from "@/lib/utils";
 
 interface NoteEditorProps {
   noteId: string;
@@ -25,6 +33,8 @@ interface NoteEditorProps {
   onSave?: () => void;
   onDelete?: () => void;
 }
+
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 export function NoteEditor({
   noteId,
@@ -40,8 +50,11 @@ export function NoteEditor({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<SaveStatus>("idle");
   const titleId = useId();
   const bodyId = useId();
+  const initialValuesRef = useRef({ title: "", body: "" });
+  const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const note = getNoteById(noteId);
 
@@ -55,6 +68,8 @@ export function NoteEditor({
     if (note) {
       setTitle(note.title);
       setBody(note.body);
+      // 初期値を保存
+      initialValuesRef.current = { title: note.title, body: note.body };
     } else {
       // ノートが見つからない場合のエラー表示とリダイレクト
       toast.error("Note not found");
@@ -66,6 +81,64 @@ export function NoteEditor({
     }
   }, [note, router, isLoading, onClose, isDeleted]);
 
+  // 自動保存関数
+  const autoSave = useCallback(
+    (newTitle: string, newBody: string) => {
+      // 初期値と同じ場合は保存しない
+      if (
+        newTitle.trim() === initialValuesRef.current.title &&
+        newBody.trim() === initialValuesRef.current.body
+      ) {
+        return;
+      }
+
+      // タイトルが空の場合は保存しない
+      if (!newTitle.trim()) {
+        return;
+      }
+
+      setAutoSaveStatus("saving");
+
+      const success = updateNote(noteId, {
+        title: newTitle.trim(),
+        body: newBody.trim(),
+      });
+
+      if (success) {
+        setAutoSaveStatus("saved");
+        // 保存完了後に初期値を更新
+        initialValuesRef.current = {
+          title: newTitle.trim(),
+          body: newBody.trim(),
+        };
+
+        // 2秒後に"saved"表示を消す
+        if (savedTimeoutRef.current) {
+          clearTimeout(savedTimeoutRef.current);
+        }
+        savedTimeoutRef.current = setTimeout(() => {
+          setAutoSaveStatus("idle");
+        }, 2000);
+      } else {
+        setAutoSaveStatus("error");
+        toast.error("Auto-save failed. Please save manually.");
+      }
+    },
+    [noteId, updateNote],
+  );
+
+  // デバウンスされた自動保存関数
+  const debouncedAutoSave = useMemo(() => debounce(autoSave, 1500), [autoSave]);
+
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (savedTimeoutRef.current) {
+        clearTimeout(savedTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -75,6 +148,8 @@ export function NoteEditor({
     }
 
     setIsSaving(true);
+    // 自動保存状態をリセット
+    setAutoSaveStatus("idle");
 
     try {
       const success = updateNote(noteId, {
@@ -84,6 +159,11 @@ export function NoteEditor({
 
       if (success) {
         toast.success("Note updated successfully");
+        // 保存成功後に初期値を更新
+        initialValuesRef.current = {
+          title: title.trim(),
+          body: body.trim(),
+        };
         if (onSave) {
           onSave();
         } else if (onClose) {
@@ -99,6 +179,22 @@ export function NoteEditor({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // タイトル変更ハンドラー
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    setAutoSaveStatus("idle");
+    debouncedAutoSave(newTitle, body);
+  };
+
+  // 本文変更ハンドラー
+  const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newBody = e.target.value;
+    setBody(newBody);
+    setAutoSaveStatus("idle");
+    debouncedAutoSave(title, newBody);
   };
 
   const handleDelete = async () => {
@@ -152,6 +248,21 @@ export function NoteEditor({
       <div className="mb-6">
         <div className="flex justify-between items-start pr-10">
           <h2 className="text-lg font-semibold">Edit Note</h2>
+          {autoSaveStatus !== "idle" && (
+            <span
+              className={`text-xs ${
+                autoSaveStatus === "saving"
+                  ? "text-muted-foreground"
+                  : autoSaveStatus === "saved"
+                    ? "text-green-600"
+                    : "text-red-600"
+              }`}
+            >
+              {autoSaveStatus === "saving" && "保存中..."}
+              {autoSaveStatus === "saved" && "保存済み"}
+              {autoSaveStatus === "error" && "保存エラー"}
+            </span>
+          )}
         </div>
       </div>
 
@@ -177,7 +288,7 @@ export function NoteEditor({
             type="text"
             placeholder="Enter note title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={handleTitleChange}
             required
             className="rounded-full px-6"
           />
@@ -204,7 +315,7 @@ export function NoteEditor({
             id={bodyId}
             placeholder="Enter note content"
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={handleBodyChange}
             rows={10}
             className="resize-none rounded-2xl px-6 py-4"
           />

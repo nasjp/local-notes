@@ -1,8 +1,7 @@
 "use client";
 
 import { Copy } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,48 +11,19 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 interface NewNoteFormProps {
   onClose?: () => void;
   onSave?: () => void;
+  onBeforeClose?: (handler: (callback: () => void) => void) => void;
 }
 
-export function NewNoteForm({ onClose, onSave }: NewNoteFormProps) {
-  const router = useRouter();
+export function NewNoteForm({
+  onClose,
+  onSave,
+  onBeforeClose,
+}: NewNoteFormProps) {
   const { addNote } = useLocalStorage();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const titleId = useId();
   const bodyId = useId();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!title.trim()) {
-      toast.error("Please enter a title");
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      const newNote = addNote({ title: title.trim(), body: body.trim() });
-
-      if (newNote) {
-        toast.success("Note saved successfully");
-        if (onSave) {
-          onSave();
-        } else if (onClose) {
-          onClose();
-        } else {
-          router.push("/");
-        }
-      } else {
-        throw new Error("Failed to save");
-      }
-    } catch {
-      toast.error("Failed to save. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleCopy = async () => {
     try {
@@ -64,13 +34,42 @@ export function NewNoteForm({ onClose, onSave }: NewNoteFormProps) {
     }
   };
 
-  const handleCancel = () => {
-    if (onClose) {
-      onClose();
-    } else {
-      router.back();
-    }
-  };
+  // コンテンツがあるかチェック
+  const hasContent = useCallback(() => {
+    return title.trim() !== "" || body.trim() !== "";
+  }, [title, body]);
+
+  // onBeforeCloseの登録
+  useEffect(() => {
+    if (!onBeforeClose) return;
+
+    const handleBeforeClose = (callback: () => void) => {
+      // コンテンツがない場合は即座にコールバックを実行
+      if (!hasContent()) {
+        callback();
+        return;
+      }
+
+      // タイトルが空の場合はバリデーションエラー
+      if (!title.trim()) {
+        toast.error("Please enter a title before closing");
+        return;
+      }
+
+      // 保存を実行
+      const newNote = addNote({ title: title.trim(), body: body.trim() });
+
+      if (newNote) {
+        toast.success("Note saved successfully");
+        // 少し遅延を入れてから閉じる
+        setTimeout(callback, 100);
+      } else {
+        toast.error("Failed to save. Please try again.");
+      }
+    };
+
+    onBeforeClose(handleBeforeClose);
+  }, [onBeforeClose, hasContent, title, body, addNote]);
 
   return (
     <>
@@ -78,7 +77,7 @@ export function NewNoteForm({ onClose, onSave }: NewNoteFormProps) {
         <h2 className="text-lg font-semibold">New Note</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-6">
         <div className="space-y-2">
           <label htmlFor={titleId} className="text-sm font-medium">
             Title <span className="text-destructive">*</span>
@@ -121,21 +120,7 @@ export function NewNoteForm({ onClose, onSave }: NewNoteFormProps) {
             className="resize-none rounded-2xl px-6 py-4"
           />
         </div>
-
-        <div className="flex gap-3">
-          <Button type="submit" disabled={isSaving} className="rounded-full">
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            className="rounded-full"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      </div>
     </>
   );
 }

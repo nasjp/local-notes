@@ -1,7 +1,6 @@
 "use client";
 
 import { Copy, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -32,6 +31,7 @@ interface NoteEditorProps {
   onClose?: () => void;
   onSave?: () => void;
   onDelete?: () => void;
+  onBeforeClose?: (handler: (callback: () => void) => void) => void;
 }
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -41,12 +41,11 @@ export function NoteEditor({
   onClose,
   onSave,
   onDelete,
+  onBeforeClose,
 }: NoteEditorProps) {
-  const router = useRouter();
   const { getNoteById, updateNote, deleteNote, isLoading } = useLocalStorage();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -71,15 +70,13 @@ export function NoteEditor({
       // 初期値を保存
       initialValuesRef.current = { title: note.title, body: note.body };
     } else {
-      // ノートが見つからない場合のエラー表示とリダイレクト
+      // ノートが見つからない場合のエラー表示
       toast.error("Note not found");
       if (onClose) {
         onClose();
-      } else {
-        router.back();
       }
     }
-  }, [note, router, isLoading, onClose, isDeleted]);
+  }, [note, isLoading, onClose, isDeleted]);
 
   // 自動保存関数
   const autoSave = useCallback(
@@ -139,47 +136,54 @@ export function NoteEditor({
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // 未保存の変更があるかチェック
+  const hasUnsavedChanges = useCallback(() => {
+    return (
+      title.trim() !== initialValuesRef.current.title ||
+      body.trim() !== initialValuesRef.current.body
+    );
+  }, [title, body]);
 
-    if (!title.trim()) {
-      toast.error("Please enter a title");
-      return;
-    }
+  // onBeforeCloseの登録
+  useEffect(() => {
+    if (!onBeforeClose) return;
 
-    setIsSaving(true);
-    // 自動保存状態をリセット
-    setAutoSaveStatus("idle");
+    const handleBeforeClose = (callback: () => void) => {
+      // 未保存の変更がない場合は即座にコールバックを実行
+      if (!hasUnsavedChanges()) {
+        callback();
+        return;
+      }
 
-    try {
+      // タイトルが空の場合はバリデーションエラー
+      if (!title.trim()) {
+        toast.error("Please enter a title before closing");
+        return;
+      }
+
+      // 保存を実行
+      setAutoSaveStatus("saving");
       const success = updateNote(noteId, {
         title: title.trim(),
         body: body.trim(),
       });
 
       if (success) {
-        toast.success("Note updated successfully");
         // 保存成功後に初期値を更新
         initialValuesRef.current = {
           title: title.trim(),
           body: body.trim(),
         };
-        if (onSave) {
-          onSave();
-        } else if (onClose) {
-          onClose();
-        } else {
-          router.back();
-        }
+        // 少し遅延を入れてから閉じる（UIフィードバックのため）
+        setTimeout(callback, 100);
       } else {
-        throw new Error("Failed to update");
+        setAutoSaveStatus("error");
+        toast.error("Failed to save. Please try again.");
       }
-    } catch {
-      toast.error("Failed to update. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    };
+
+    onBeforeClose(handleBeforeClose);
+  }, [onBeforeClose, hasUnsavedChanges, title, body, noteId, updateNote]);
 
   // タイトル変更ハンドラー
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,8 +214,6 @@ export function NoteEditor({
           onDelete();
         } else if (onClose) {
           onClose();
-        } else {
-          router.back();
         }
       } else {
         throw new Error("Failed to delete");
@@ -228,14 +230,6 @@ export function NoteEditor({
       toast.success("Note copied to clipboard");
     } catch {
       toast.error("Failed to copy");
-    }
-  };
-
-  const handleCancel = () => {
-    if (onClose) {
-      onClose();
-    } else {
-      router.back();
     }
   };
 
@@ -266,7 +260,7 @@ export function NoteEditor({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <label htmlFor={titleId} className="text-sm font-medium">
@@ -320,21 +314,7 @@ export function NoteEditor({
             className="resize-none rounded-2xl px-6 py-4"
           />
         </div>
-
-        <div className="flex gap-3">
-          <Button type="submit" disabled={isSaving} className="rounded-full">
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            className="rounded-full"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>

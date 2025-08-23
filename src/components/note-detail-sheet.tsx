@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { NoteEditor } from "@/components/note-editor";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
@@ -12,6 +12,9 @@ interface NoteDetailSheetProps {
 export function NoteDetailSheet({ noteId }: NoteDetailSheetProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
+  const beforeCloseCallbackRef = useRef<
+    ((callback: () => void) => void) | null
+  >(null);
 
   const handleClose = () => {
     // Sheetを閉じる（アニメーション開始）
@@ -25,20 +28,53 @@ export function NoteDetailSheet({ noteId }: NoteDetailSheetProps) {
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      handleClose();
+      // beforeCloseCallbackがある場合は、それを実行
+      if (beforeCloseCallbackRef.current) {
+        beforeCloseCallbackRef.current(() => {
+          handleClose();
+        });
+      } else {
+        handleClose();
+      }
+    }
+  };
+
+  const handleInteractOutside = (event: Event) => {
+    // beforeCloseCallbackがある場合は、デフォルト動作を防ぐ
+    if (beforeCloseCallbackRef.current) {
+      event.preventDefault();
+      beforeCloseCallbackRef.current(() => {
+        handleClose();
+      });
+    }
+  };
+
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    // beforeCloseCallbackがある場合は、デフォルト動作を防ぐ
+    if (beforeCloseCallbackRef.current) {
+      event.preventDefault();
+      beforeCloseCallbackRef.current(() => {
+        handleClose();
+      });
     }
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+      <SheetContent
+        className="w-full sm:max-w-lg overflow-y-auto p-0"
+        onInteractOutside={handleInteractOutside}
+        onEscapeKeyDown={handleEscapeKeyDown}
+      >
         <SheetTitle className="sr-only">Edit</SheetTitle>
         <div className="p-6">
           <NoteEditor
             noteId={noteId}
             onClose={handleClose}
-            onSave={handleClose}
             onDelete={handleClose}
+            onBeforeClose={(callback) => {
+              beforeCloseCallbackRef.current = callback;
+            }}
           />
         </div>
       </SheetContent>

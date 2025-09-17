@@ -34,12 +34,17 @@ export function NoteGrid() {
   const filteredNotes = useMemo(() => {
     if (!searchQuery.trim()) return notes;
 
-    const query = searchQuery.toLowerCase();
-    return notes.filter(
-      (note) =>
-        note.title.toLowerCase().includes(query) ||
-        note.body.toLowerCase().includes(query),
-    );
+    const normalizeForSearch = (value: string) =>
+      value.normalize("NFKC").toLowerCase();
+
+    const query = normalizeForSearch(searchQuery);
+    return notes.filter((note) => {
+      const normalizedTitle = normalizeForSearch(note.title);
+      const normalizedBody = normalizeForSearch(note.body);
+      return (
+        normalizedTitle.includes(query) || normalizedBody.includes(query)
+      );
+    });
   }, [notes, searchQuery]);
 
   const handleCopy = (e: React.MouseEvent, text: string) => {

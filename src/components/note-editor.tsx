@@ -26,20 +26,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { debounce } from "@/lib/utils";
 
-interface NoteEditorProps {
+type NoteEditorProps = {
   noteId: string;
-  onClose?: () => void;
-  onSave?: () => void;
-  onDelete?: () => void;
-  onBeforeClose?: (handler: (callback: () => void) => void) => void;
-}
+  onClose: () => void;
+  onDelete: () => void;
+  onBeforeClose: (handler: (callback: () => void) => void) => void;
+};
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 export function NoteEditor({
   noteId,
   onClose,
-  onSave,
   onDelete,
   onBeforeClose,
 }: NoteEditorProps) {

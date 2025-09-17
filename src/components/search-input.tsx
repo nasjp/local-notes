@@ -1,9 +1,9 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useSearchContext } from "@/contexts/search-context";
-import { usePathname } from "next/navigation";
 
 export function SearchInput() {
   const { searchQuery, setSearchQuery } = useSearchContext();
@@ -42,7 +42,8 @@ export function SearchInput() {
     const isEditable = (el: EventTarget | null) => {
       if (!(el instanceof HTMLElement)) return false;
       const tag = el.tagName.toLowerCase();
-      if (tag === "input" || tag === "textarea" || tag === "select") return true;
+      if (tag === "input" || tag === "textarea" || tag === "select")
+        return true;
       if (el.isContentEditable) return true;
       return false;
     };
@@ -53,7 +54,6 @@ export function SearchInput() {
       if (e.defaultPrevented) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // IME合成中は無視
-      // @ts-expect-error: isComposing may exist in KeyboardEvent
       if (e.isComposing) return;
 
       const key = e.key;
@@ -96,7 +96,10 @@ export function SearchInput() {
           const tag = active?.tagName.toLowerCase();
           const editable = !!(
             active &&
-            (tag === "input" || tag === "textarea" || tag === "select" || active.isContentEditable)
+            (tag === "input" ||
+              tag === "textarea" ||
+              tag === "select" ||
+              active.isContentEditable)
           );
           if (!editable) {
             inputRef.current?.focus();

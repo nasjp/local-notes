@@ -34,7 +34,7 @@ export default function InterceptedNoteDetailPage() {
           <NoteEditor
             noteId={noteId}
             onClose={handleClose}
-            onSave={handleClose}
+            onBeforeClose={() => {}}
             onDelete={handleClose}
           />
         </div>

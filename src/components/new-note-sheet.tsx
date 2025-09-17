@@ -5,9 +5,9 @@ import { useRef, useState } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { NewNoteForm } from "./new-note-form";
 
-interface NewNoteSheetProps {
+type NewNoteSheetProps = {
   isIntercepted?: boolean;
-}
+};
 
 export function NewNoteSheet({ isIntercepted = false }: NewNoteSheetProps) {
   const router = useRouter();

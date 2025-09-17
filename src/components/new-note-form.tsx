@@ -8,17 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-interface NewNoteFormProps {
-  onClose?: () => void;
-  onSave?: () => void;
-  onBeforeClose?: (handler: (callback: () => void) => void) => void;
-}
+type NewNoteFormProps = {
+  onBeforeClose: (handler: (callback: () => void) => void) => void;
+};
 
-export function NewNoteForm({
-  onClose,
-  onSave,
-  onBeforeClose,
-}: NewNoteFormProps) {
+export function NewNoteForm({ onBeforeClose }: NewNoteFormProps) {
   const { addNote } = useLocalStorage();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");

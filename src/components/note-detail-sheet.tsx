@@ -5,9 +5,9 @@ import { useRef, useState } from "react";
 import { NoteEditor } from "@/components/note-editor";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
-interface NoteDetailSheetProps {
+type NoteDetailSheetProps = {
   noteId: string;
-}
+};
 
 export function NoteDetailSheet({ noteId }: NoteDetailSheetProps) {
   const router = useRouter();

@@ -41,9 +41,7 @@ export function NoteGrid() {
     return notes.filter((note) => {
       const normalizedTitle = normalizeForSearch(note.title);
       const normalizedBody = normalizeForSearch(note.body);
-      return (
-        normalizedTitle.includes(query) || normalizedBody.includes(query)
-      );
+      return normalizedTitle.includes(query) || normalizedBody.includes(query);
     });
   }, [notes, searchQuery]);
 

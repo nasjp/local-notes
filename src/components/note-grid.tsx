@@ -14,7 +14,10 @@ import {
 } from "@/components/ui/card";
 import { useSearchContext } from "@/contexts/search-context";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { restoreScrollPosition, saveScrollPosition } from "@/lib/scroll-position";
+import {
+  restoreScrollPosition,
+  saveScrollPosition,
+} from "@/lib/scroll-position";
 
 export function NoteGrid() {
   const router = useRouter();

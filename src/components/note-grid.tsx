@@ -101,7 +101,7 @@ export function NoteGrid() {
             <Card
               key={note.id}
               className="h-full hover:shadow-lg transition-shadow cursor-pointer relative"
-              onClick={() => router.push(`/p/${note.id}`)}
+              onClick={() => router.push(`/p/${note.id}`, { scroll: false })}
             >
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start gap-2">

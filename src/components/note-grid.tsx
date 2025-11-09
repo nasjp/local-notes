@@ -1,8 +1,8 @@
 "use client";
 
 import { Copy, FileText } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/card";
 import { useSearchContext } from "@/contexts/search-context";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { restoreScrollPosition, saveScrollPosition } from "@/lib/scroll-position";
 
 export function NoteGrid() {
   const router = useRouter();
+  const pathname = usePathname();
   const { notes, isLoading, error } = useLocalStorage();
   const { searchQuery } = useSearchContext();
   const [isVisible, setIsVisible] = useState(false);
@@ -29,6 +31,12 @@ export function NoteGrid() {
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
+
+  // ホーム画面に戻ってきたときだけスクロール位置を復元
+  useEffect(() => {
+    if (pathname !== "/") return;
+    restoreScrollPosition();
+  }, [pathname]);
 
   // 検索フィルタリング（部分一致、大文字小文字区別なし）
   const filteredNotes = useMemo(() => {
@@ -58,6 +66,14 @@ export function NoteGrid() {
         toast.error("Failed to copy");
       });
   };
+
+  const handleNoteClick = useCallback(
+    (noteId: string) => {
+      saveScrollPosition();
+      router.push(`/p/${noteId}`, { scroll: false });
+    },
+    [router],
+  );
 
   // エラー表示
   if (error) {
@@ -101,7 +117,7 @@ export function NoteGrid() {
             <Card
               key={note.id}
               className="h-full hover:shadow-lg transition-shadow cursor-pointer relative"
-              onClick={() => router.push(`/p/${note.id}`, { scroll: false })}
+              onClick={() => handleNoteClick(note.id)}
             >
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start gap-2">

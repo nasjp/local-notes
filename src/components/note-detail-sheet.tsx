@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { NoteEditor } from "@/components/note-editor";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { saveScrollPosition } from "@/lib/scroll-position";
 
 type NoteDetailSheetProps = {
   noteId: string;
@@ -17,6 +18,7 @@ export function NoteDetailSheet({ noteId }: NoteDetailSheetProps) {
   >(null);
 
   const handleClose = () => {
+    saveScrollPosition();
     // Sheetを閉じる（アニメーション開始）
     setIsOpen(false);
     // アニメーション完了後にルーティング

@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { NoteEditor } from "@/components/note-editor";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { saveScrollPosition } from "@/lib/scroll-position";
 
 export default function InterceptedNoteDetailPage() {
   const params = useParams();
@@ -12,6 +13,7 @@ export default function InterceptedNoteDetailPage() {
   const [isOpen, setIsOpen] = useState(true);
 
   const handleClose = () => {
+    saveScrollPosition();
     // Sheetを閉じる（アニメーション開始）
     setIsOpen(false);
     // アニメーション完了後にルーティング

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useSearchContext } from "@/contexts/search-context";
+import { consumeSkipHomeFocusFlag } from "@/lib/scroll-position";
 
 export function SearchInput() {
   const { searchQuery, setSearchQuery } = useSearchContext();
@@ -25,6 +26,7 @@ export function SearchInput() {
   // 初期表示時（ホームのみ）に自動フォーカス
   useEffect(() => {
     if (!isHome) return;
+    if (consumeSkipHomeFocusFlag()) return;
     // 少し遅らせてレイアウト確定後にフォーカス
     const t = setTimeout(() => {
       inputRef.current?.focus();
@@ -88,26 +90,7 @@ export function SearchInput() {
       placeholder="Search..."
       value={localSearchInput}
       onChange={(e) => setLocalSearchInput(e.target.value)}
-      onBlur={() => {
-        if (!isHome) return;
-        // 入力からフォーカスが外れても、入力系以外に移った場合は再フォーカス
-        setTimeout(() => {
-          const active = document.activeElement as HTMLElement | null;
-          const tag = active?.tagName.toLowerCase();
-          const editable = !!(
-            active &&
-            (tag === "input" ||
-              tag === "textarea" ||
-              tag === "select" ||
-              active.isContentEditable)
-          );
-          if (!editable) {
-            inputRef.current?.focus();
-          }
-        }, 0);
-      }}
       className="w-full rounded-full px-6 shadow-sm"
-      autoFocus={isHome}
       inputMode="search"
     />
   );
